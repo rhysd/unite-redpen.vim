@@ -1,7 +1,7 @@
 vim-redpen
 ==========
 
-This is a Vim integration of [redpen](https://github.com/redpen-cc/redpen) for proof reading.  [redpen](https://github.com/redpen-cc/redpen) is available for Markdown, AsciiDoc, Textile and LaTeX.
+This is a Vim integration of [redpen](https://github.com/redpen-cc/redpen) for proof reading.  You can validate double-negative, weak-expression, doubled-word, [and so on](http://redpen.cc/docs/latest/index.html#validator).  [redpen](https://github.com/redpen-cc/redpen) is available for Markdown, AsciiDoc, Textile and LaTeX.
 
 **Under construction**
 
