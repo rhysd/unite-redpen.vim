@@ -8,7 +8,7 @@ This is a Vim integration of [redpen](https://github.com/redpen-cc/redpen) for p
 ### Usage
 
 ```
-:Redpen [--quickrun] [redpen arguments...]
+:Redpen [--quickrun|--unite] [redpen arguments...]
 ```
 
 When you put a `redpen-config.xml` configuration file in a repository, vim-redpen detects it automatically. You can also set `g:redpen_default_config_path`.
@@ -18,7 +18,7 @@ When you put a `redpen-config.xml` configuration file in a repository, vim-redpe
 - [x] Configuration detection
 - Engines
   - [x] [vim-quickrun](https://github.com/thinca/vim-quickrun)
-  - [ ] [unite.vim](https://github.com/Shougo/unite.vim)
+  - [x] [unite.vim](https://github.com/Shougo/unite.vim) (highlights for unite buffer and preview window are not yet)
   - [ ] Inline (finally this should be default)
 - [ ] Support Neovim job control
 - [ ] Support Vim job control
