@@ -61,7 +61,7 @@ endfunction
 
 function! redpen#run(args) abort
     if !executable(g:redpen_command)
-        call redpen#echo_error("'%s' is not found", g:redpen_command)
+        call redpen#echo_error("'%s' command is not found", g:redpen_command)
         return 1
     endif
 
@@ -92,4 +92,8 @@ function! redpen#run(args) abort
     endif
 
     return redpen#run_{engine}(redpen#detect_config(file), args)
+endfunction
+
+function! redpen#complete(arglead, cmdline, pos) abort
+    return join(filter(map(glob(a:arglead . '*', 0, 1), 'isdirectory(v:val) ? v:val . "/" : v:val'), 'v:val =~# "\\.\\%(md\\|markdown\\|asciidoc\\|tex\\)\\|/$"'), "\n")
 endfunction
