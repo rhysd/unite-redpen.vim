@@ -1,0 +1,28 @@
+<redpen-conf>
+    <validators>
+        <validator name="SentenceLength">
+              <property name="max_len" value="120"/>
+        </validator>
+        <validator name="CommaNumber" />
+        <validator name="SuccessiveWord" />
+        <validator name="DoubledWord" />
+
+        <validator name="InvalidExpression" />
+        <validator name="InvalidWord" />
+        <validator name="Contraction" />
+        <validator name="Spelling" />
+        <validator name="DoubledWord" />
+        <validator name="SuccessiveWord" />
+
+        <validator name="DoubleNegative" />
+        <validator name="FrequentSentenceStart" />
+        <validator name="WordFrequency" />
+        <validator name="Hyphenation" />
+        <validator name="NumberFormat" />
+        <validator name="WeakExpression" />
+
+        <validator name="ParagraphNumber" />
+        <validator name="SectionLength" />
+        <validator name="DuplicatedSection" />
+    </validators>
+</redpen-conf>

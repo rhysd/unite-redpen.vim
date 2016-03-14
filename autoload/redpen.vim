@@ -31,12 +31,28 @@ function! s:parse_engine(args) abort
     return [found, a:args]
 endfunction
 
-function! redpen#run_quickrun(args) abort
+function! redpen#detect_config(file) abort
+    let dir = fnamemodify(a:file, ':p:h')
+    if !isdirectory(dir)
+        return g:redpen_default_config_path
+    endif
+
+    let conf = findfile('redpen-config.xml', dir . ';')
+    if conf ==# ''
+        return g:redpen_default_config_path
+    endif
+
+    return conf
+endfunction
+
+function! redpen#run_quickrun(conf, args) abort
     let config = get(g:quickrun_config, 'redpen', {})
 
-    " TODO: Detect config file
-
-    let config.exec = '%c %o ' . join(a:args, ' ') . ' 2>/dev/null'
+    let config.exec = '%c %o ' . join(a:args, ' ')
+    if a:conf !=# ''
+        let config.exec .= ' -c ' . a:conf
+    endif
+    let config.exec .= ' 2>/dev/null'
     let config.command = get(config, 'command', g:redpen_command)
 
     call quickrun#run(config)
@@ -54,6 +70,7 @@ function! redpen#run(args) abort
         let engine = g:redpen_default_engine
     endif
 
+    let file = ''
     if args == []
         let file = expand('%')
         if &modified || !filereadable(file)
@@ -61,7 +78,18 @@ function! redpen#run(args) abort
             return 1
         endif
         let args += [file]
+    else
+        for a in args
+            if filereadable(a)
+                let file = a
+                break
+            endif
+        endfor
+        if file ==# ''
+            call redpen#echo_error('No existing file is included: %s', join(args, ' '))
+            return 1
+        endif
     endif
 
-    return redpen#run_{engine}(args)
+    return redpen#run_{engine}(redpen#detect_config(file), args)
 endfunction

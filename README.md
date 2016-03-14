@@ -1,7 +1,7 @@
 vim-redpen
 ==========
 
-This is a Vim integration of [redpen](https://github.com/redpen-cc/redpen) for proof reading.
+This is a Vim integration of [redpen](https://github.com/redpen-cc/redpen) for proof reading.  [redpen](https://github.com/redpen-cc/redpen) is available for Markdown, AsciiDoc, Textile and LaTeX.
 
 **Under construction**
 
@@ -11,13 +11,17 @@ This is a Vim integration of [redpen](https://github.com/redpen-cc/redpen) for p
 :Redpen [--quickrun] [redpen arguments...]
 ```
 
+When you put a `redpen-config.xml` configuration file in a repository, vim-redpen detects it automatically. You can also set `g:redpen_default_config_path`.
+
 ### TODO
 
-- [ ] Configuration detection
+- [x] Configuration detection
 - Engines
   - [x] [vim-quickrun](https://github.com/thinca/vim-quickrun)
   - [ ] [unite.vim](https://github.com/Shougo/unite.vim)
   - [ ] Inline (finally this should be default)
+- [ ] Support Neovim job control
+- [ ] Support Vim job control
 - [ ] Help
 - [ ] Tests
 
