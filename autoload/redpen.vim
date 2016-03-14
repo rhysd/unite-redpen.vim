@@ -1,0 +1,67 @@
+function redpen#echo_error(msg, ...)
+    echohl ErrorMsg
+    try
+        if a:0 ==# 0
+            echomsg a:msg
+        else
+            echomsg call('printf', [a:msg] + a:000)
+        endif
+    finally
+        echohl None
+    endtry
+endfunction
+
+let s:ENGINES = ['--quickrun']
+
+" Note: This invalidates a:args
+function! s:parse_engine(args) abort
+    let found = ''
+    for idx in range(len(a:args))
+        let arg = a:args[idx]
+        if stridx(arg, '--') == 0 && index(s:ENGINES, arg) >= 0
+            if found !=# ''
+                call redpen#echo_error('Only one engine can be specified: %s v.s. %s', found, arg)
+                return ['', a:args]
+            else
+                let found = arg
+                unlet a:args[idx]
+            endif
+        endif
+    endfor
+    return [found, a:args]
+endfunction
+
+function! redpen#run_quickrun(args) abort
+    let config = get(g:quickrun_config, 'redpen', {})
+
+    " TODO: Detect config file
+
+    let config.exec = '%c %o ' . join(a:args, ' ') . ' 2>/dev/null'
+    let config.command = get(config, 'command', g:redpen_command)
+
+    call quickrun#run(config)
+    return 0
+endfunction
+
+function! redpen#run(args) abort
+    if !executable(g:redpen_command)
+        call redpen#echo_error("'%s' is not found", g:redpen_command)
+        return 1
+    endif
+
+    let [engine, args] = s:parse_engine(a:args)
+    if engine ==# ''
+        let engine = g:redpen_default_engine
+    endif
+
+    if args == []
+        let file = expand('%')
+        if &modified || !filereadable(file)
+            call redpen#echo_error('Current buffer is not saved: %s', file)
+            return 1
+        endif
+        let args += [file]
+    endif
+
+    return redpen#run_{engine}(args)
+endfunction
