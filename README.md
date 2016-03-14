@@ -25,6 +25,12 @@ When you put a `redpen-config.xml` configuration file in a repository, vim-redpe
 - [ ] Help
 - [ ] Tests
 
+### FAQ
+
+- **Why don't you extend [vim-grammarous](https://github.com/rhysd/vim-grammarous)?**
+
+[vim-grammarous](https://github.com/rhysd/vim-grammarous) has too specific user experience for [languagetool](https://github.com/languagetool-org/languagetool).  [languagetool](https://github.com/languagetool-org/languagetool) is a very powerful grammar checker.  But it is not for proof reading.  In addition, redpen offers markdown support and provides more powerful Japanese checker.
+
 ### License
 
 Distributed under [MIT license](https://opensource.org/licenses/MIT).
