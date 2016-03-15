@@ -77,7 +77,7 @@ endfunction
 
 function! redpen#run_unite(conf, args) abort
     call redpen#set_current_buffer(a:conf, a:args)
-    call unite#start(['redpen'], {'auto_preview' : 1})
+    call unite#start(['redpen'], {'auto_preview' : 1, 'start_insert' : 0})
 endfunction
 
 function! redpen#detect_config(file) abort
