@@ -18,7 +18,7 @@ When you put a `redpen-config.xml` configuration file in a repository, vim-redpe
 - [x] Configuration detection
 - Engines
   - [x] [vim-quickrun](https://github.com/thinca/vim-quickrun)
-  - [x] [unite.vim](https://github.com/Shougo/unite.vim) (highlights for unite buffer and preview window are not yet)
+  - [x] [unite.vim](https://github.com/Shougo/unite.vim)
   - [ ] Inline (finally this should be default)
 - [ ] Support Neovim job control
 - [ ] Support Vim job control

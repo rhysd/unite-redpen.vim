@@ -12,14 +12,6 @@ function! unite#sources#redpen#define() abort
     return s:source
 endfunction
 
-highlight default link RedpenPreviewError ErrorMsg
-highlight default link RedpenPreviewSection Keyword
-augroup pluging-rammarous-highlight
-    autocmd!
-    autocmd ColorScheme * highlight default link RedpenPreviewError ErrorMsg
-    autocmd ColorScheme * highlight default link RedpenPreviewSection Keyword
-augroup END
-
 let g:unite_redpen_default_jumplist_preview = get(g:, 'unite_redpen_default_jumplist_preview', 0)
 
 function! s:source.hooks.on_init(args, context) abort
@@ -88,48 +80,5 @@ function! s:source.action_table.preview.func(candidate) abort
     else
         noautocmd silent execute 'pedit! __REDPEN_ERROR__'
     endif
-
-    let unite_winnr = winnr()
-    try
-        wincmd P
-        let e = a:candidate.action__redpen_error
-        let buffer = join([
-                \   'Error:',
-                \   '  ' . e.message,
-                \   '',
-                \   'Sentence:',
-                \   '  ' . matchstr(e.sentence, '^\s*\zs.*'),
-                \   '',
-                \   'Validator:',
-                \   '  ' . e.validator,
-                \ ], "\n")
-        execute 1
-        normal! "_dG
-        silent put! =buffer
-
-        syntax match RedpenPreviewSection "\%(Sentence\|Validator\):"
-        syntax match RedpenPreviewError "Error:"
-
-        setlocal nonumber
-        setlocal nolist
-        setlocal noswapfile
-        setlocal nospell
-        setlocal nomodeline
-        setlocal nofoldenable
-        setlocal foldcolumn=0
-        setlocal nomodified
-
-        let nr = bufwinnr(a:candidate.action__buffer_nr)
-        echom nr
-        if nr != -1
-            execute nr . 'wincmd w'
-            if has_key(e, 'startPosition')
-                call cursor(e.startPosition.lineNum, e.startPosition.offset)
-            else
-                call cursor(e.lineNum, e.sentenceStartColumnNum)
-            endif
-        endif
-    finally
-        execute unite_winnr . 'wincmd w'
-    endtry
+    call redpen#open_error_preview(a:candidate.action__redpen_error, a:candidate.action__buffer_nr, 1)
 endfunction
