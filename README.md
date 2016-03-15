@@ -8,7 +8,7 @@ This is a Vim integration of [redpen](https://github.com/redpen-cc/redpen) for p
 ### Usage
 
 ```
-:Redpen [--quickrun|--unite] [redpen arguments...]
+:Redpen [--quickrun|--unite|--inline] [redpen arguments...]
 ```
 
 When you put a `redpen-config.xml` configuration file in a repository, vim-redpen detects it automatically. You can also set `g:redpen_default_config_path`.
@@ -18,8 +18,8 @@ When you put a `redpen-config.xml` configuration file in a repository, vim-redpe
 - [x] Configuration detection
 - Engines
   - [x] [vim-quickrun](https://github.com/thinca/vim-quickrun)
-  - [x] [unite.vim](https://github.com/Shougo/unite.vim)
-  - [ ] Inline (finally this should be default)
+  - [x] [unite.vim](https://github.com/Shougo/unite.vim) (default)
+  - [x] Inline
 - [ ] Support Neovim job control
 - [ ] Support Vim job control
 - [ ] Help
@@ -29,7 +29,7 @@ When you put a `redpen-config.xml` configuration file in a repository, vim-redpe
 
 - **Why don't you extend [vim-grammarous](https://github.com/rhysd/vim-grammarous)?**
 
-[vim-grammarous](https://github.com/rhysd/vim-grammarous) has too specific user experience for [languagetool](https://github.com/languagetool-org/languagetool).  [languagetool](https://github.com/languagetool-org/languagetool) is a very powerful grammar checker.  But it is not for proof reading.  In addition, redpen offers markdown support and provides more powerful Japanese checker.
+[vim-grammarous](https://github.com/rhysd/vim-grammarous) has too specific user experience for [languagetool](https://github.com/languagetool-org/languagetool).  [languagetool](https://github.com/languagetool-org/languagetool) is a powerful grammar checker.  But it is not for proof reading.  In addition, redpen offers markdown support and provides more powerful Japanese checker.
 
 ### License
 

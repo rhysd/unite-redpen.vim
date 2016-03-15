@@ -41,25 +41,29 @@ function! s:source.hooks.on_syntax(args, context) abort
     syntax region uniteSource__RedpenString start=+"+ end=+"+ oneline contained containedin=uniteSource__Redpen
     syntax match uniteSource__RedpenLabel "\[\w\+]" contained containedin=uniteSource__Redpen
     highlight default link uniteSource__RedpenString String
-    highlight default link uniteSource__RedpenLabel Special
+    highlight default link uniteSource__RedpenLabel Comment
 endfunction
 
 function! s:source.gather_candidates(args, context) abort
-    let max_validator_len = 0
-    let errors = get(getbufvar(a:context.source__bufnr, 'redpen_errors'), 'errors', [])
-    for e in errors
-        let len = strlen(e.validator)
-        if len > max_validator_len
-            let max_validator_len = len
-        endif
-    endfor
-    return map(copy(errors), '{
-            \   "word" :  "[" . v:val.validator . "] " . repeat(" ", max_validator_len - strlen(v:val.validator)) . v:val.message,
+    return map(copy(get(getbufvar(a:context.source__bufnr, 'redpen_errors'), 'errors', [])), '{
+            \   "word" :  v:val.message . " [" . v:val.validator . "]",
             \   "action__buffer_nr" : a:context.source__bufnr,
             \   "action__line" : has_key(v:val, "startPosition") ? v:val.startPosition.lineNum : v:val.lineNum,
             \   "action__col" : has_key(v:val, "startPosition") ? v:val.startPosition.offset : v:val.sentenceStartColumnNum,
             \   "action__redpen_error" : v:val,
+            \   "is_multiline" : 1,
             \ }')
+endfunction
+
+let s:source.action_table.echo_json = {
+            \   'description' : 'Echo JSON value corresponding to the error',
+            \ }
+function! s:source.action_table.echo_json.func(candidate) abort
+    try
+        PP a:candidate.action__redpen_error
+    catch
+        echo a:candidate.action__redpen_error
+    endtry
 endfunction
 
 if g:unite_redpen_default_jumplist_preview

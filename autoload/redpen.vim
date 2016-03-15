@@ -69,12 +69,14 @@ function! redpen#open_error_preview(err, bufnr, already_open) abort
                 \   'Validator:',
                 \   '  ' . a:err.validator,
                 \ ], "\n")
-        execute 1
-        normal! "_dG
+        normal! gg"_dG
         silent put! =buffer
 
         syntax match RedpenPreviewSection "\%(Sentence\|Validator\):"
         syntax match RedpenPreviewError "Error:"
+
+        execute 'resize' line('$')
+        execute 1
 
         setlocal nonumber
         setlocal nolist
@@ -84,9 +86,10 @@ function! redpen#open_error_preview(err, bufnr, already_open) abort
         setlocal nofoldenable
         setlocal foldcolumn=0
         setlocal nomodified
+        setlocal bufhidden=delete
+        setlocal buftype=nofile
 
         let nr = bufwinnr(a:bufnr)
-        echom nr
         if nr != -1
             execute nr . 'wincmd w'
             if has_key(a:err, 'startPosition')
@@ -95,6 +98,8 @@ function! redpen#open_error_preview(err, bufnr, already_open) abort
                 call cursor(a:err.lineNum, a:err.sentenceStartColumnNum)
             endif
         endif
+
+        nnoremap <buffer>q :<C-u>q<CR>
 
         let b:redpen_bufnr = a:bufnr
     finally
@@ -241,7 +246,7 @@ endfunction
 
 function! redpen#run_unite(conf, args) abort
     call redpen#set_current_buffer(a:conf, a:args)
-    call unite#start(['redpen'], {'auto_preview' : 1, 'start_insert' : 0})
+    call unite#start(['redpen'], g:redpen_unite_default_context)
 endfunction
 
 function! redpen#detect_config(file) abort

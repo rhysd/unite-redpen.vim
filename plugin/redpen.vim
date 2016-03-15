@@ -5,6 +5,7 @@ endif
 let g:redpen_command = get(g:, 'redpen_command', 'redpen')
 let g:redpen_default_engine = get(g:, 'redpen_default_engine', 'unite')
 let g:redpen_default_config_path = get(g:, 'redpen_default_config_path', '')
+let g:redpen_unite_default_context = get(g:, 'redpen_unite_default_context', {'auto_preview' : 1, 'start_insert' : 0})
 
 command! -nargs=* -complete=custom,redpen#complete Redpen call redpen#run([<f-args>])
 command! -nargs=0 RedpenReset call redpen#reset_current_buffer()
