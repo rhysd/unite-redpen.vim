@@ -28,7 +28,7 @@ If you want to use [vim-quickrun](https://github.com/thinca/vim-quickrun) to exe
 let conf = {'command': 'redpen'}
 let redpen_conf = unite#sources#redpen#detect_config(expand('%:p'))
 if redpen_conf !=# ''
-    conf.cmdopt = '-c ' . redpen_conf
+    conf.cmdopt = '-c ' . redpen_conf . ' 2>/dev/null'
 endif
 call quickrun#run(conf)
 ```
