@@ -1,27 +1,42 @@
-vim-redpen
-==========
+unite-redpen.vim
+================
 
-This is a Vim integration of [redpen](https://github.com/redpen-cc/redpen) for proof reading.  You can validate double-negative, weak-expression, doubled-word, [and so on](http://redpen.cc/docs/latest/index.html#validator).  [redpen](https://github.com/redpen-cc/redpen) is available for Markdown, AsciiDoc, Textile and LaTeX.
-
-**Under construction**
+This is a [unite.vim](https://github.com/Shougo/unite.vim) integration of [redpen](https://github.com/redpen-cc/redpen) for proof reading.  You can validate double-negative, weak-expression, doubled-word, [and so on](http://redpen.cc/docs/latest/index.html#validator).  [redpen](https://github.com/redpen-cc/redpen) is available for Markdown, AsciiDoc, Textile and LaTeX.
 
 ### Usage
 
-```
-:Redpen [--quickrun|--unite|--inline] [redpen arguments...]
+TODO: screenshot
+
+```vim
+:Unite redpen
+
+" With command line options
+:Unite redpen:--limit:10
+
+" Show preview automatically
+:Unite redpen -auto-preview
 ```
 
-When you put a `redpen-config.xml` configuration file in a repository, vim-redpen detects it automatically. You can also set `g:redpen_default_config_path`.
+The command executes `redpen` and show the errors reported by it in unite.vim window.  In the list, you can preview detail of the error (`p` is assigned by default).  When select an item in the list, cursor will move to the error position.
+
+If you put a `redpen-config.xml` configuration file in a repository, unite-redpen.vim detects it automatically. You can also set `g:redpen_default_config_path` for global default configuration.
+
+
+If you want to use [vim-quickrun](https://github.com/thinca/vim-quickrun) to execute redpen, you can use `unite#sources#redpen#detect_config()` function.
+
+```vim
+let conf = {'command': 'redpen'}
+let redpen_conf = unite#sources#redpen#detect_config(expand('%:p'))
+if redpen_conf !=# ''
+    conf.cmdopt = '-c ' . redpen_conf
+endif
+call quickrun#run(conf)
+```
 
 ### TODO
 
+- [x] Fundamentals
 - [x] Configuration detection
-- Engines
-  - [x] [vim-quickrun](https://github.com/thinca/vim-quickrun)
-  - [x] [unite.vim](https://github.com/Shougo/unite.vim) (default)
-  - [x] Inline
-- [ ] Support Neovim job control
-- [ ] Support Vim job control
 - [ ] Help
 - [ ] Tests
 

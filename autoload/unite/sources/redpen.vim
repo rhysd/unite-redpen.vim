@@ -1,3 +1,4 @@
+" unite.vim source definition {{{
 let s:source = {
             \ 'name' : 'redpen',
             \ 'description' : 'Show result of redpen',
@@ -11,9 +12,159 @@ let s:source = {
 function! unite#sources#redpen#define() abort
     return s:source
 endfunction
+" }}}
+
+" Highlights {{{
+highlight default link RedpenPreviewError ErrorMsg
+highlight default link RedpenPreviewSection Keyword
+augroup pluging-unite-redpen-highlight
+    autocmd!
+    autocmd ColorScheme * highlight default link RedpenPreviewError ErrorMsg
+    autocmd ColorScheme * highlight default link RedpenPreviewSection Keyword
+augroup END
+" }}}
+
+" Variables {{{
+let s:V = vital#of('unite_redpen')
+let s:J = s:V.import('Web.JSON')
 
 let g:unite_redpen_default_jumplist_preview = get(g:, 'unite_redpen_default_jumplist_preview', 0)
+let g:unite_redpen_default_config_path = get(g:, 'unite_redpen_default_config_path', '')
+let g:unite_redpen_command = get(g:, 'unite_redpen_command', 'redpen')
+" }}}
 
+" Utilities {{{
+function s:echo_error(msg, ...)
+    echohl ErrorMsg
+    try
+        if a:0 ==# 0
+            echomsg a:msg
+        else
+            echomsg call('printf', [a:msg] + a:000)
+        endif
+    finally
+        echohl None
+    endtry
+endfunction
+
+function! unite#sources#redpen#detect_config(file) abort
+    let dir = fnamemodify(a:file, ':p:h')
+    if !isdirectory(dir)
+        return g:unite_redpen_default_config_path
+    endif
+
+    let conf = findfile('redpen-config.xml', dir . ';')
+    if conf ==# ''
+        return g:unite_redpen_default_config_path
+    endif
+
+    return conf
+endfunction
+
+function! unite#sources#redpen#run_command(args) abort
+    if !executable(g:unite_redpen_command)
+        call s:echo_error("'%s' command is not found", g:unite_redpen_command)
+        return {}
+    endif
+
+    let args = a:args
+
+    let file = ''
+    if args == []
+        let file = expand('%')
+        if &modified || !filereadable(file)
+            " TODO:
+            " Write a current buffer to temporary file
+            call s:echo_error('Current buffer is not saved: %s', file)
+            return {}
+        endif
+        let args += [file]
+    else
+        for a in args
+            if filereadable(a)
+                let file = a
+                break
+            endif
+        endfor
+        if file ==# ''
+            call s:echo_error('No existing file is included: %s', join(args, ' '))
+            return {}
+        endif
+    endif
+
+    let args += ['-r', 'json']
+    let opts = join(args, ' ') . ' 2>/dev/null'
+    let conf = unite#sources#redpen#detect_config(file)
+    if conf !=# ''
+        let opts = printf('-c %s %s', conf, opts)
+    endif
+
+    let cmd = g:unite_redpen_command . ' ' . opts
+    " XXX:
+    " 'redpen' command always returns exit code 1...
+    " XXX:
+    " Vital.Process.system() causes an error on 2>/dev/null
+    " Although '2>/dev/null' is added, there is stderr output at the last of
+    " output.
+    let json = system(cmd)
+    try
+        return s:J.decode(json)[0]
+    catch
+        return {}
+    endtry
+endfunction
+" }}}
+
+" Error preview {{{
+function! s:write_error_preview(err, bufnr) abort
+    let unite_winnr = winnr()
+    try
+        wincmd P
+        let buffer = join([
+                \   'Error:',
+                \   '  ' . a:err.message,
+                \   '',
+                \   'Sentence:',
+                \   '  ' . matchstr(a:err.sentence, '^\s*\zs.*'),
+                \   '',
+                \   'Validator:',
+                \   '  ' . a:err.validator,
+                \ ], "\n")
+        normal! gg"_dG
+        silent put! =buffer
+
+        syntax match RedpenPreviewSection "\%(Sentence\|Validator\):"
+        syntax match RedpenPreviewError "Error:"
+
+        execute 'resize' line('$')
+        execute 1
+
+        setlocal nonumber
+        setlocal nolist
+        setlocal noswapfile
+        setlocal nospell
+        setlocal nomodeline
+        setlocal nofoldenable
+        setlocal foldcolumn=0
+        setlocal nomodified
+        setlocal bufhidden=delete
+        setlocal buftype=nofile
+
+        let nr = bufwinnr(a:bufnr)
+        if nr != -1
+            execute nr . 'wincmd w'
+            if has_key(a:err, 'startPosition')
+                call cursor(a:err.startPosition.lineNum, a:err.startPosition.offset)
+            else
+                call cursor(a:err.lineNum, a:err.sentenceStartColumnNum)
+            endif
+        endif
+    finally
+        execute unite_winnr . 'wincmd w'
+    endtry
+endfunction
+" }}}
+" Source implementation {{{
 function! s:source.hooks.on_init(args, context) abort
     if exists('b:unite') && has_key(b:unite, 'prev_bufnr')
         let a:context.source__bufnr = b:unite.prev_bufnr
@@ -21,19 +172,16 @@ function! s:source.hooks.on_init(args, context) abort
         let a:context.source__bufnr = bufnr('%')
     endif
 
-    let result = getbufvar(a:context.source__bufnr, 'redpen_errors')
-    if type(result) == type('')
-        let should_jump = a:context.source__bufnr != bufnr('%')
-        if should_jump
-            let w = bufwinnr(a:context.source__bufnr)
-            execute w . 'wincmd w'
-        endif
-        let file = expand('%:p')
-        let args = a:args != [] ? a:args : [file]
-        call redpen#set_current_buffer(redpen#detect_config(file), args)
-        if should_jump
-            wincmd p
-        endif
+    let should_jump = a:context.source__bufnr != bufnr('%')
+    if should_jump
+        let w = bufwinnr(a:context.source__bufnr)
+        execute w . 'wincmd w'
+    endif
+    let file = expand('%:p')
+    let args = a:args != [] ? a:args : [file]
+    let a:context.source__redpen_errors = unite#sources#redpen#run_command(args)
+    if should_jump
+        wincmd p
     endif
 endfunction
 
@@ -45,7 +193,11 @@ function! s:source.hooks.on_syntax(args, context) abort
 endfunction
 
 function! s:source.gather_candidates(args, context) abort
-    return map(copy(get(getbufvar(a:context.source__bufnr, 'redpen_errors'), 'errors', [])), '{
+    if a:context.source__redpen_errors == {}
+        return []
+    endif
+
+    return map(copy(get(a:context.source__redpen_errors, 'errors', [])), '{
             \   "word" :  v:val.message . " [" . v:val.validator . "]",
             \   "action__buffer_nr" : a:context.source__bufnr,
             \   "action__line" : has_key(v:val, "startPosition") ? v:val.startPosition.lineNum : v:val.lineNum,
@@ -84,5 +236,6 @@ function! s:source.action_table.preview.func(candidate) abort
     else
         noautocmd silent execute 'pedit! __REDPEN_ERROR__'
     endif
-    call redpen#open_error_preview(a:candidate.action__redpen_error, a:candidate.action__buffer_nr, 1)
+    call s:write_error_preview(a:candidate.action__redpen_error, a:candidate.action__buffer_nr)
 endfunction
+" }}}
