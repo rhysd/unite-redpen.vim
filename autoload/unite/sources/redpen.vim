@@ -35,6 +35,7 @@ let g:unite_redpen_default_jumplist_preview = get(g:, 'unite_redpen_default_jump
 let g:unite_redpen_default_config_path = get(g:, 'unite_redpen_default_config_path', '')
 let g:unite_redpen_command = get(g:, 'unite_redpen_command', 'redpen')
 let g:unite_redpen_detail_window_on_preview = get(g:, 'unite_redpen_detail_window_on_preview', 0)
+let g:unite_redpen_default_mappings = get(g:, 'unite_redpen_default_mappings', 1)
 " }}}
 
 " Utilities {{{
@@ -281,7 +282,9 @@ function! s:source.hooks.on_syntax(args, context) abort
     highlight default link uniteSource__RedpenString String
     highlight default link uniteSource__RedpenLabel Comment
 
-    nnoremap <buffer><silent><expr>d unite#smart_map('d', unite#do_action('detail'))
+    if g:unite_redpen_default_mappings
+        nnoremap <buffer><silent><expr>d unite#smart_map('d', unite#do_action('detail'))
+    endif
 endfunction
 
 function! s:source.hooks.on_close(args, context) abort
