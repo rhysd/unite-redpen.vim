@@ -1,0 +1,57 @@
+scriptencoding utf-8
+
+Describe unite#sources#redpen#run_command()
+    It fails when command is not found
+        let saved = get(g:, 'unite_redpen_command', 'redpen')
+        try
+            let g:unite_redpen_command = 'non-existing-command'
+            Assert Equals(unite#sources#redpen#run_command([]), {})
+        finally
+            let g:unite_redpen_command = saved
+        endtry
+    End
+
+    It fails when only flags are included in args
+        Assert Equals(unite#sources#redpen#run_command(['-l', '10']), {})
+    End
+
+    It returns the result of 'redpen' command
+        let result = unite#sources#redpen#run_command([])
+        Assert NotEmpty(result)
+        Assert HasKey(result, '__configuration')
+        Assert HasKey(result, 'errors')
+    End
+
+    It can run command for non-existing buffer
+        try
+            edit! non-existing-file-path
+            call append(0, [
+                    \ '無いことは無い。',
+                    \ '日本語は分かりませんがが、これは日本語です。',
+                    \ ])
+            set nomodified
+            let output = unite#sources#redpen#run_command([])
+            Assert NotEmpty(output)
+            Assert HasKey(output, 'errors')
+        finally
+            bdelete!
+            set nomodified
+        endtry
+    End
+
+    It can run command for modified buffer
+        try
+            call append(0, [
+                    \ '無いことは無い。',
+                    \ '日本語は分かりませんがが、これは日本語です。',
+                    \ ])
+            set modified
+            let output = unite#sources#redpen#run_command([])
+            Assert NotEmpty(output)
+            Assert HasKey(output, 'errors')
+        finally
+            bdelete!
+            set nomodified
+        endtry
+    End
+End

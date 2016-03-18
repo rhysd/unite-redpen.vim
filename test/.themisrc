@@ -2,7 +2,8 @@ let g:repo_root = fnamemodify(expand('<sfile>'), ':h:h')
 
 call themis#option('exclude', 'test/README.md')
 call themis#option('exclude', 'test/Guardfile')
-call themis#helper('command').with(themis#helper('assert')).with({'Expect': g:Expect})
+call themis#option('exclude', 'test/assets')
+call themis#helper('command').with(themis#helper('assert'))
 
 for s:rtp in ['unite.vim', '~/.vim/bundle/unite.vim', '~/.vim/bundle/unite']
     let r = expand(s:rtp)

@@ -32,6 +32,30 @@ Features:
 Please see [documentation](doc/unite-redpen.txt) to know all features.
 
 
+## Installation
+
+- With [vim-plug](https://github.com/junegunn/vim-plug)
+
+```vim
+Plug 'Shougo/unite.vim'
+Plug 'rhysd/unite-redpen.vim'
+```
+
+- With [vundle](https://github.com/VundleVim/Vundle.vim)
+
+```vim
+Plugin 'Shougo/unite.vim'
+Plugin 'rhysd/unite-redpen.vim'
+```
+
+- With [neobundle](https://github.com/Shougo/neobundle.vim)
+
+```vim
+NeoBundle 'Shougo/unite.vim'
+NeoBundle 'rhysd/unite-redpen.vim'
+```
+
+
 ## TODO
 
 - [x] Fundamentals
