@@ -33,6 +33,7 @@ let s:J = s:V.import('Web.JSON')
 let g:unite_redpen_default_jumplist_preview = get(g:, 'unite_redpen_default_jumplist_preview', 0)
 let g:unite_redpen_default_config_path = get(g:, 'unite_redpen_default_config_path', '')
 let g:unite_redpen_command = get(g:, 'unite_redpen_command', 'redpen')
+let g:unite_redpen_detail_window_on_preview = get(g:, 'unite_redpen_detail_window_on_preview', 0)
 " }}}
 
 " Utilities {{{
@@ -172,7 +173,7 @@ function! s:move_to_error(err, bufnr) abort
 endfunction
 
 function! s:write_error_preview(err, bufnr) abort
-    let unite_winnr = winnr()
+    let prev_winnr = winnr()
     try
         wincmd P
         let buffer = join([
@@ -205,10 +206,24 @@ function! s:write_error_preview(err, bufnr) abort
         setlocal bufhidden=delete
         setlocal buftype=nofile
     finally
-        execute unite_winnr . 'wincmd w'
+        execute prev_winnr . 'wincmd w'
     endtry
 endfunction
+
+function! s:open_detail_window(err, bufnr) abort
+    if get(g:, 'unite_kind_file_vertical_preview', 0)
+        let unite_winwidth = winwidth(0)
+        noautocmd silent execute 'vertical pedit! __REDPEN_ERROR__'
+        wincmd P
+        let winwidth = (unite_winwidth + winwidth(0)) / 2
+        execute 'wincmd p | vert resize ' . winwidth
+    else
+        noautocmd silent execute 'pedit! __REDPEN_ERROR__'
+    endif
+    call s:write_error_preview(a:err, a:bufnr)
+endfunction
 " }}}
+
 " Source implementation {{{
 function! s:source.hooks.on_init(args, context) abort
     if exists('b:unite') && has_key(b:unite, 'prev_bufnr')
@@ -222,9 +237,11 @@ function! s:source.hooks.on_init(args, context) abort
         let w = bufwinnr(a:context.source__bufnr)
         execute w . 'wincmd w'
     endif
+
     let file = expand('%:p')
     let args = a:args != [] ? a:args : [file]
     let a:context.source__redpen_errors = unite#sources#redpen#run_command(args)
+
     if should_jump
         wincmd p
     endif
@@ -235,6 +252,8 @@ function! s:source.hooks.on_syntax(args, context) abort
     syntax match uniteSource__RedpenLabel "\[\w\+]" contained containedin=uniteSource__Redpen
     highlight default link uniteSource__RedpenString String
     highlight default link uniteSource__RedpenLabel Comment
+
+    nnoremap <buffer><silent><expr>d unite#smart_map('d', unite#do_action('detail'))
 endfunction
 
 function! s:source.hooks.on_close(args, context) abort
@@ -256,14 +275,22 @@ function! s:source.gather_candidates(args, context) abort
         return []
     endif
 
-    return map(copy(get(a:context.source__redpen_errors, 'errors', [])), '{
-            \   "word" :  v:val.message . " [" . v:val.validator . "]",
-            \   "action__buffer_nr" : a:context.source__bufnr,
-            \   "action__line" : has_key(v:val, "startPosition") ? v:val.startPosition.lineNum : v:val.lineNum,
-            \   "action__col" : has_key(v:val, "startPosition") ? v:val.startPosition.offset : v:val.sentenceStartColumnNum,
-            \   "action__redpen_error" : v:val,
-            \   "is_multiline" : 1,
-            \ }')
+    let errors = get(a:context.source__redpen_errors, 'errors', [])
+    let ret = []
+    for idx in range(len(errors))
+        let e = errors[idx]
+        let ret += [{
+            \   'word' :  e.message . ' [' . e.validator . ']',
+            \   'is_multiline' : 1,
+            \   'action__buffer_nr' : a:context.source__bufnr,
+            \   'action__line' : has_key(e, 'startPosition') ? e.startPosition.lineNum : e.lineNum,
+            \   'action__col' : has_key(e, 'startPosition') ? e.startPosition.offset : e.sentenceStartColumnNum,
+            \   'action__redpen_error' : e,
+            \   'action__redpen_id' : idx,
+            \ }]
+    endfor
+
+    return ret
 endfunction
 
 let s:source.action_table.echo_json = {
@@ -277,6 +304,21 @@ function! s:source.action_table.echo_json.func(candidate) abort
     endtry
 endfunction
 
+let s:source.action_table.detail = {
+            \   'description' : 'Show detail of the error',
+            \   'is_quit' : 0
+            \ }
+function! s:source.action_table.detail.func(candidate) abort
+    let id = a:candidate.action__redpen_id
+    if exists('b:unite_redpen_detail_opened') && (id == b:unite_redpen_detail_opened)
+        pclose
+        unlet! b:unite_redpen_detail_opened
+    else
+        call s:open_detail_window(a:candidate.action__redpen_error, a:candidate.action__buffer_nr)
+        let b:unite_redpen_detail_opened = id
+    endif
+endfunction
+
 if g:unite_redpen_default_jumplist_preview
     finish
 endif
@@ -286,18 +328,13 @@ let s:source.action_table.preview = {
             \   'is_quit' : 0,
             \ }
 function! s:source.action_table.preview.func(candidate) abort
-    if get(g:, 'unite_kind_file_vertical_preview', 0)
-        let unite_winwidth = winwidth(0)
-        noautocmd silent execute 'vertical pedit! __REDPEN_ERROR__'
-        wincmd P
-        let winwidth = (unite_winwidth + winwidth(0)) / 2
-        execute 'wincmd p | vert resize ' . winwidth
-    else
-        noautocmd silent execute 'pedit! __REDPEN_ERROR__'
-    endif
     let e = a:candidate.action__redpen_error
     let b = a:candidate.action__buffer_nr
-    call s:write_error_preview(e, b)
+
+    if g:unite_redpen_detail_window_on_preview
+        call s:open_detail_window(a:err, a:bufnr)
+    endif
+
     call s:move_to_error(e, b)
 endfunction
 " }}}
