@@ -3,7 +3,7 @@ unite-redpen.vim
 
 This is a [unite.vim](https://github.com/Shougo/unite.vim) integration of [redpen](https://github.com/redpen-cc/redpen) for proof reading.  You can validate double-negative, weak-expression, doubled-word, [and so on](http://redpen.cc/docs/latest/index.html#validator).  [redpen](https://github.com/redpen-cc/redpen) is available for Markdown, AsciiDoc, Textile and LaTeX.
 
-### Usage
+## Usage
 
 TODO: screenshot
 
@@ -26,21 +26,21 @@ TODO: screenshot
 - You can also set `g:redpen_default_config_path` for global default configuration.
 
 
-### TODO
+## TODO
 
 - [x] Fundamentals
 - [x] Configuration detection
-- [ ] Available on temprary/unsaved buffer
+- [x] Available on temprary/unsaved buffer
 - [ ] Help
 - [ ] Tests
 
-### FAQ
+## FAQ
 
-- **Why don't you extend [vim-grammarous](https://github.com/rhysd/vim-grammarous)?**
+### Why don't you extend [vim-grammarous](https://github.com/rhysd/vim-grammarous)?
 
 [vim-grammarous](https://github.com/rhysd/vim-grammarous) has too specific user experience for [languagetool](https://github.com/languagetool-org/languagetool).  [languagetool](https://github.com/languagetool-org/languagetool) is a powerful grammar checker.  But it is not for proof reading.  In addition, redpen offers markdown support and provides more powerful Japanese checker.
 
-- **Can I run [vim-quickrun](https://github.com/thinca/vim-quickrun) instead of unite.vim?**
+### Can I run [vim-quickrun](https://github.com/thinca/vim-quickrun) instead of unite.vim?
 
 You can use `unite#sources#redpen#detect_config()` and `quickrun#run()`.
 
@@ -60,7 +60,7 @@ command! -nargs=? Redpen call s:run_redpen_with_quickrun(<f-args>)
 ```
 
 
-### License
+## License
 
 Distributed under [MIT license](https://opensource.org/licenses/MIT).
 

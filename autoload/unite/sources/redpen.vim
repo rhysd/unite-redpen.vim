@@ -29,6 +29,7 @@ augroup END
 " Variables {{{
 let s:V = vital#of('unite_redpen')
 let s:J = s:V.import('Web.JSON')
+let s:EXT_MAP = {'markdown' : '.md', 'asciidoc' : '.asc', 'latex' : '.tex'}
 
 let g:unite_redpen_default_jumplist_preview = get(g:, 'unite_redpen_default_jumplist_preview', 0)
 let g:unite_redpen_default_config_path = get(g:, 'unite_redpen_default_config_path', '')
@@ -64,6 +65,20 @@ function! unite#sources#redpen#detect_config(file) abort
     return conf
 endfunction
 
+function! s:generate_temporary_file() abort
+    let name = tempname()
+    if has_key(s:EXT_MAP, &filetype)
+        let name .= s:EXT_MAP[&filetype]
+    endif
+    let lines = getline(1, '$')
+    let failed = writefile(lines, name) != -1
+    if failed
+        call s:echo_error('Failed to create temporary file: %s', name)
+        return ''
+    endif
+    return name
+endfunction
+
 function! unite#sources#redpen#run_command(args) abort
     if !executable(g:unite_redpen_command)
         call s:echo_error("'%s' command is not found", g:unite_redpen_command)
@@ -76,12 +91,14 @@ function! unite#sources#redpen#run_command(args) abort
     if args == []
         let file = expand('%')
         if &modified || !filereadable(file)
-            " TODO:
-            " Write a current buffer to temporary file
-            call s:echo_error('Current buffer is not saved: %s', file)
-            return {}
+            let file = s:generate_temporary_file()
+            if file ==# ''
+                return {}
+            endif
+            let temporary_file_created = 1
         endif
         let args += [file]
+        let conf = unite#sources#redpen#detect_config(expand('%'))
     else
         for a in args
             if filereadable(a)
@@ -93,11 +110,11 @@ function! unite#sources#redpen#run_command(args) abort
             call s:echo_error('No existing file is included: %s', join(args, ' '))
             return {}
         endif
+        let conf = unite#sources#redpen#detect_config(file)
     endif
 
     let args += ['-r', 'json']
     let opts = join(args, ' ') . ' 2>/dev/null'
-    let conf = unite#sources#redpen#detect_config(file)
     if conf !=# ''
         let opts = printf('-c %s %s', conf, opts)
     endif
@@ -114,6 +131,10 @@ function! unite#sources#redpen#run_command(args) abort
         return s:J.decode(json)[0]
     catch
         return {}
+    finally
+        if exists('l:temporary_file_created')
+            call delete(file)
+        endif
     endtry
 endfunction
 " }}}
