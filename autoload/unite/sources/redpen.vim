@@ -89,7 +89,7 @@ function! unite#sources#redpen#run_command(args) abort
 
     let file = ''
     if args == []
-        let file = expand('%')
+        let file = expand('%:p')
         if &modified || !filereadable(file)
             let file = s:generate_temporary_file()
             if file ==# ''
@@ -98,7 +98,7 @@ function! unite#sources#redpen#run_command(args) abort
             let temporary_file_created = 1
         endif
         let args += [file]
-        let conf = unite#sources#redpen#detect_config(expand('%'))
+        let conf = unite#sources#redpen#detect_config(expand('%:p'))
     else
         for a in args
             if filereadable(a)
@@ -305,7 +305,7 @@ function! s:source.gather_candidates(args, context) abort
             \   'is_multiline' : 1,
             \   'action__buffer_nr' : a:context.source__bufnr,
             \   'action__line' : has_key(e, 'startPosition') ? e.startPosition.lineNum : e.lineNum,
-            \   'action__col' : has_key(e, 'startPosition') ? e.startPosition.offset : e.sentenceStartColumnNum,
+            \   'action__col' : (has_key(e, 'startPosition') ? e.startPosition.offset : e.sentenceStartColumnNum) + 1,
             \   'action__redpen_error' : e,
             \   'action__redpen_id' : idx,
             \ }]
