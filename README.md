@@ -50,13 +50,12 @@ You can use `unite#sources#redpen#detect_config()` and `quickrun#run()`.
 
 ```vim
 function! s:run_redpen_with_quickrun(...) abort
-    let file = get(a:, 1, expand('%:p'))
     let conf = {
         \   'command': 'redpen',
         \   'exec' : '%c %o %s 2>/dev/null',
         \   'srcfile' : file,
         \ }
-    let redpen_conf = unite#sources#redpen#detect_config(file)
+    let redpen_conf = unite#sources#redpen#detect_config(expand('%:p'))
     if redpen_conf !=# ''
         let conf.cmdopt = '-c ' . redpen_conf
     endif

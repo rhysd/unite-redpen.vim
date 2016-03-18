@@ -136,7 +136,9 @@ function! unite#sources#redpen#run_command(args) abort
     " output.
     let json = system(cmd)
     try
-        return s:J.decode(json)[0]
+        let result = s:J.decode(json)[0]
+        let result.__configuration = conf
+        return result
     catch
         return {}
     finally
@@ -254,6 +256,7 @@ endfunction
 " }}}
 
 " Source implementation {{{
+" Hooks {{{
 function! s:source.hooks.on_init(args, context) abort
     if exists('b:unite') && has_key(b:unite, 'prev_bufnr')
         let a:context.source__bufnr = b:unite.prev_bufnr
@@ -284,6 +287,7 @@ function! s:source.hooks.on_syntax(args, context) abort
 
     if g:unite_redpen_default_mappings
         nnoremap <buffer><silent><expr>d unite#smart_map('d', unite#do_action('detail'))
+        nnoremap <buffer><silent><expr>a unite#smart_map('a', unite#do_action('add_symbol'))
     endif
 endfunction
 
@@ -310,6 +314,7 @@ function! s:source.gather_candidates(args, context) abort
     let ret = []
     for idx in range(len(errors))
         let e = errors[idx]
+        let e.__configuration = a:context.source__redpen_errors.__configuration
         let ret += [{
             \   'word' :  e.message . ' [' . e.validator . ']',
             \   'is_multiline' : 1,
@@ -323,7 +328,9 @@ function! s:source.gather_candidates(args, context) abort
 
     return ret
 endfunction
+" }}}
 
+" Actions {{{
 let s:source.action_table.echo_json = {
             \   'description' : 'Echo JSON value corresponding to the error',
             \ }
@@ -350,6 +357,60 @@ function! s:source.action_table.detail.func(candidate) abort
     endif
 endfunction
 
+let s:source.action_table.add_symbol = {
+            \   'description' : 'Add a symbol from misspelling error',
+            \   'is_quit' : 0,
+            \ }
+function! s:source.action_table.add_symbol.func(candidate) abort
+    let word = matchstr(a:candidate.word, 'ミススペルの可能性がある単語 "\zs[^"]\+\ze" がみつかりました。')
+    if word ==# ''
+        call s:echo_error('No word was found from the error message')
+        return
+    endif
+
+    let conf = a:candidate.action__redpen_error.__configuration
+    if conf ==# ''
+        call s:echo_error('No configuration file was detected to add symbol')
+        return
+    endif
+
+    let line_symbols = []
+    let line_redpen_conf = []
+    let lines = readfile(conf)
+    for idx in range(len(lines))
+        let line = lines[idx]
+        if line =~# '^\s*<\/redpen-conf>\s*$'
+            let line_redpen_conf = [idx, line]
+            break
+        elseif line =~# '^\s*<\/symbols>\s*$'
+            let line_symbols = [idx, line]
+            break
+        endif
+    endfor
+
+    if line_symbols != []
+        let [i, l] = line_symbols
+        let indent = matchstr(l, '^\s*') . '  '
+        let xml = printf('%s<symbol name="%s" value="%s" />', indent, toupper(word), word)
+        call insert(lines, xml, i)
+    elseif line_redpen_conf != []
+        PP! line_redpen_conf
+        let [i, l] = line_redpen_conf
+        let indent = matchstr(l, '^\s*') . '  '
+        let xml = printf("%s  <symbol name=\"%s\" value=\"%s\" />", indent, toupper(word), word)
+        let lines = lines[  : i-1] +
+                    \ [
+                    \   indent . '<symbols>',
+                    \   xml,
+                    \   indent . '</symbols>',
+                    \ ]
+                    \ + lines[i : ]
+    else
+        call s:echo_error('Could not detect </redpen-conf> and </symbols>.  Maybe invalid XML: ' . conf)
+    endif
+    call writefile(lines, conf)
+endfunction
+
 if g:unite_redpen_default_jumplist_preview
     finish
 endif
@@ -368,4 +429,5 @@ function! s:source.action_table.preview.func(candidate) abort
 
     call s:move_to_error(e, b)
 endfunction
+" }}}
 " }}}
