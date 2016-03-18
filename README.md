@@ -1,6 +1,6 @@
 unite-redpen.vim
 ================
-[![Build Status](https://travis-ci.org/rhysd/unite-redpen.vim.svg?branch=master)](https://travis-ci.org/rhysd/unite-redpen.vim)
+> [![Build Status](https://travis-ci.org/rhysd/unite-redpen.vim.svg?branch=master)](https://travis-ci.org/rhysd/unite-redpen.vim)
 
 This is a [unite.vim](https://github.com/Shougo/unite.vim) integration of [redpen](https://github.com/redpen-cc/redpen) for proof reading.  You can validate double-negative, weak-expression, doubled-word, [and so on](http://redpen.cc/docs/latest/index.html#validator).  [redpen](https://github.com/redpen-cc/redpen) is available for Markdown, AsciiDoc, Textile and LaTeX.
 
@@ -11,12 +11,14 @@ TODO: screenshot
 ```vim
 :Unite redpen
 
-" With command line options
-:Unite redpen:--limit:10
-
 " Show preview automatically
 :Unite redpen -auto-preview
+
+" With command line options
+:Unite redpen:--limit:10
 ```
+
+Features:
 
 - `:Unite redpen` executes `redpen` and show list of the errors reported by it in unite.vim window.
 - When select an item in the list, cursor will move to the error position.
@@ -32,7 +34,8 @@ TODO: screenshot
 - [x] Fundamentals
 - [x] Configuration detection
 - [x] Available on temprary/unsaved buffer
-- [ ] Help
+- [x] Help
+- [ ] Add an action to add a symbol from misspelling error
 - [ ] Tests
 
 ## FAQ

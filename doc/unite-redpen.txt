@@ -1,0 +1,186 @@
+*unite-redpen.txt*		Automatic proof reading in Vim
+
+CONTENTS                                                 *unite-redpen-contents*
+
+1. Introduction................................|unite-redpen-unite-introduction|
+2. Usage....................................................|unite-redpen-usage|
+3. Variables............................................|unite-redpen-variables|
+4. Functions............................................|unite-redpen-functions|
+5. FAQ........................................................|unite-redpen-faq|
+6. License................................................|unite-redpen-license|
+
+
+==============================================================================
+INTRODUCTION                                   *unite-redpen-unite-introduction*
+
+*unite-redpen* is a unite.vim integration of redpen for proof reading.
+You can validate double-negative, weak-expression, doubled-word, and so on.
+redpen is available for Markdown, AsciiDoc, Textile and LaTeX.
+
+- unite.vim
+
+    https://github.com/Shougo/unite.vim
+
+- redpen
+
+    https://github.com/redpen-cc/redpen
+
+- redpen's validators
+
+    http://redpen.cc/docs/latest/index.html#validator
+
+
+==============================================================================
+USAGE                                                       *unite-redpen-usage*
+
+TODO: screenshot
+
+Please specify "redpen" source on |:Unite| command as below:
+>
+    :Unite redpen
+    " Show preview automatically
+    :Unite redpen -auto-preview
+    " With command line options
+    :Unite redpen:--limit:10
+<
+
+Features:
+
+    - It executes "redpen" command and show list of the errors reported by it
+      in unite.vim window.
+
+    - When an item selected in the list, cursor will move to the error
+      position.
+
+    - In the list, you can confirm place of the error with highlight ("p" is
+      assigned by default).
+
+    - In the list, you can see the detail with mini window ("d" is assigned by
+      default).  "d" toggles the mini window.
+
+    - If you want to use previous result, you can use `:UniteResume` command to
+      restore last unite.vim window.
+
+    - If you put a "redpen-config.xml" configuration file in a repository,
+      |unite-redpen| detects it automatically.
+
+    - You can also set |g:redpen_default_config_path| for global default
+      configuration.
+
+
+==============================================================================
+VARIABLES                                               *unite-redpen-variables*
+
+*g:unite_redpen_default_config_path*
+
+    Path to default configuration file to define general validators and symbol
+    table.  If no "redpen-config.xml" is found in target file's directory, it
+    is used.  Empty string means no default configuration file.
+    Default value is "".
+
+*g:unite_redpen_command*
+
+    Command to execute redpen.  Please ensure that this command exists.
+    Default value is "redpen".
+
+*g:unite_redpen_detail_window_on_preview*
+
+    If this variable is set to 1, "preview" action in unite.vim window will
+    also open detail window.
+    The default value is 0.
+
+    Note: "detail" action is mapped to "d" in unite.vim window by default.
+
+*g:unite_redpen_default_mappings*
+
+    If this variable is set to 1, default mappings,  such as "d" for "detail"
+    action, are defined in unite.vim window.  Otherwise |unite-redpen| defines
+    no mapping.
+    Default value is 1.
+
+*g:unite_redpen_default_jumplist_preview*
+
+    If this variable is set to 1, unite.vim uses jumplist source's default
+    preview action to preview errors.
+    Default value is 0.
+
+
+==============================================================================
+FUNCTIONS                                               *unite-redpen-functions*
+
+                                            *unite#sources#redpen#detect_config*
+unite#sources#redpen#detect_config({file})
+
+    Returns the path to redpen's configuration file for {file}.  If nothing is
+    found, it returns empty string.
+
+    Note: The file name must be "respen-config.xml".
+
+                                              *unite#sources#redpen#run_command*
+unite#sources#redpen#run_command({args})
+
+    Executes "redpen" command with {args}.  Configuration file is
+    automatically detected and "-r json" is appended to arguments to make
+    redpen output JSON.
+    It returns JSON value of redpen.  If some error occurs, it shows error
+    message and returns empty dictionary
+
+
+==============================================================================
+FAQ                                                           *unite-redpen-faq*
+
+* Why don't you extend vim-grammarous? ()?
+
+    vim-grammarous has too specific user experience for languagetool.
+    LanguageTool is a powerful grammar checker.  But it is not for proof
+    reading.  In addition, redpen offers markdown support and provides more
+    powerful Japanese checker.
+
+    vim-grammarous: https://github.com/rhysd/vim-grammarous
+    LanguageTool: https://github.com/languagetool-org/languagetool
+
+* Can I run vim-quickrun () instead of unite.vim?
+
+    You can use |unite#sources#redpen#detect_config()| and |quickrun#run()|.
+>
+    function! s:run_redpen_with_quickrun(...) abort
+        let conf = {'command': 'redpen'}
+        let redpen_conf = unite#sources#redpen#detect_config(get(a:, 1, expand('%:p')))
+        if redpen_conf !=# ''
+            let conf.cmdopt = '-c ' . redpen_conf . ' 2>/dev/null'
+        endif
+        call quickrun#run(conf)
+    endfunction
+    " `:Redpen` checks current file
+    " `:Redpen file` checks the file
+    command! -nargs=? Redpen call s:run_redpen_with_quickrun(<f-args>)
+<
+
+    vim-quickrun: https://github.com/thinca/vim-quickrun
+
+
+==============================================================================
+LICENSE                                                   *unite-redpen-license*
+
+Distributed under MIT license (https://opensource.org/licenses/MIT).
+>
+    Copyright (c) 2016 rhysd
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+    of the Software, and to permit persons to whom the Software is furnished to do so,
+    subject to the following conditions:
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+    INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+    PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+    LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+    THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+<
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:et:fen:fdl=0:
