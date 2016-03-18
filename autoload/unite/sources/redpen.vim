@@ -17,10 +17,12 @@ endfunction
 " Highlights {{{
 highlight default link RedpenPreviewError ErrorMsg
 highlight default link RedpenPreviewSection Keyword
+highlight default link RedpenError SpellBad
 augroup pluging-unite-redpen-highlight
     autocmd!
     autocmd ColorScheme * highlight default link RedpenPreviewError ErrorMsg
     autocmd ColorScheme * highlight default link RedpenPreviewSection Keyword
+    autocmd ColorScheme * highlight default link RedpenError SpellBad
 augroup END
 " }}}
 
@@ -116,6 +118,59 @@ endfunction
 " }}}
 
 " Error preview {{{
+function! s:delete_current_error_match() abort
+    if exists('b:unite_redpen_error_match_id')
+        call matchdelete(b:unite_redpen_error_match_id)
+        unlet! b:unite_redpen_error_match_id
+    endif
+endfunction
+
+function! s:matcherrpos(...) abort
+    return matchaddpos('RedpenError', [a:000], 999)
+endfunction
+
+function! s:matcherr(start, end) abort
+    let line = a:start.lineNum
+    if a:end.lineNum == line
+        return s:matcherrpos(a:start.lineNum, a:start.offset+1, a:end.offset - a:start.offset + 1)
+    endif
+
+    let len = strlen(getline(line)) - a:start.offset + 1
+    let line += 1
+    while line != a:end.lineNum
+        let += strlen(getline(line))
+        let line += 1
+    endwhile
+
+    let len += a:end.offset
+    return s:matcherrpos(a:start.lineNum, a:start.offset+1, len)
+endfunction
+
+function! s:move_to_error(err, bufnr) abort
+    let nr = bufwinnr(a:bufnr)
+    if nr < 0
+        return
+    endif
+
+    try
+        if nr != -1
+            execute nr . 'wincmd w'
+            call s:delete_current_error_match()
+
+            if has_key(a:err, 'startPosition')
+                let l = a:err.startPosition.lineNum
+                let c = a:err.startPosition.offset
+                call cursor(a:err.startPosition.lineNum, a:err.startPosition.offset)
+                let b:unite_redpen_error_match_id = s:matcherr(a:err.startPosition, a:err.endPosition)
+            else
+                call cursor(a:err.lineNum, a:err.sentenceStartColumnNum)
+            endif
+        endif
+    finally
+        wincmd p
+    endtry
+endfunction
+
 function! s:write_error_preview(err, bufnr) abort
     let unite_winnr = winnr()
     try
@@ -149,16 +204,6 @@ function! s:write_error_preview(err, bufnr) abort
         setlocal nomodified
         setlocal bufhidden=delete
         setlocal buftype=nofile
-
-        let nr = bufwinnr(a:bufnr)
-        if nr != -1
-            execute nr . 'wincmd w'
-            if has_key(a:err, 'startPosition')
-                call cursor(a:err.startPosition.lineNum, a:err.startPosition.offset)
-            else
-                call cursor(a:err.lineNum, a:err.sentenceStartColumnNum)
-            endif
-        endif
     finally
         execute unite_winnr . 'wincmd w'
     endtry
@@ -190,6 +235,20 @@ function! s:source.hooks.on_syntax(args, context) abort
     syntax match uniteSource__RedpenLabel "\[\w\+]" contained containedin=uniteSource__Redpen
     highlight default link uniteSource__RedpenString String
     highlight default link uniteSource__RedpenLabel Comment
+endfunction
+
+function! s:source.hooks.on_close(args, context) abort
+    let winnr = winbufnr(a:context.source__bufnr)
+    if winnr < 0
+        return
+    endif
+
+    try
+        execute winnr . 'wincmd w'
+        call s:delete_current_error_match()
+    finally
+        wincmd p
+    endtry
 endfunction
 
 function! s:source.gather_candidates(args, context) abort
@@ -236,6 +295,9 @@ function! s:source.action_table.preview.func(candidate) abort
     else
         noautocmd silent execute 'pedit! __REDPEN_ERROR__'
     endif
-    call s:write_error_preview(a:candidate.action__redpen_error, a:candidate.action__buffer_nr)
+    let e = a:candidate.action__redpen_error
+    let b = a:candidate.action__buffer_nr
+    call s:write_error_preview(e, b)
+    call s:move_to_error(e, b)
 endfunction
 " }}}
