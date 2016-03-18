@@ -38,7 +38,7 @@ let g:unite_redpen_detail_window_on_preview = get(g:, 'unite_redpen_detail_windo
 " }}}
 
 " Utilities {{{
-function s:echo_error(msg, ...)
+function! s:echo_error(msg, ...) abort
     echohl ErrorMsg
     try
         if a:0 ==# 0
@@ -160,7 +160,7 @@ function! s:matcherr(start, end) abort
     let len = strlen(getline(line)) - a:start.offset + 1
     let line += 1
     while line != a:end.lineNum
-        let += strlen(getline(line))
+        let len += strlen(getline(line))
         let line += 1
     endwhile
 
@@ -353,7 +353,7 @@ function! s:source.action_table.preview.func(candidate) abort
     let b = a:candidate.action__buffer_nr
 
     if g:unite_redpen_detail_window_on_preview
-        call s:open_detail_window(a:err, a:bufnr)
+        call s:open_detail_window(e, b)
     endif
 
     call s:move_to_error(e, b)

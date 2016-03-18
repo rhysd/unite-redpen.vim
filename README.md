@@ -1,5 +1,6 @@
 unite-redpen.vim
 ================
+[![Build Status](https://travis-ci.org/rhysd/unite-redpen.vim.svg?branch=master)](https://travis-ci.org/rhysd/unite-redpen.vim)
 
 This is a [unite.vim](https://github.com/Shougo/unite.vim) integration of [redpen](https://github.com/redpen-cc/redpen) for proof reading.  You can validate double-negative, weak-expression, doubled-word, [and so on](http://redpen.cc/docs/latest/index.html#validator).  [redpen](https://github.com/redpen-cc/redpen) is available for Markdown, AsciiDoc, Textile and LaTeX.
 

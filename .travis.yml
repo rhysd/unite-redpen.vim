@@ -1,0 +1,5 @@
+anguage: python
+python: 3.5
+sudo: false
+install: pip install vim-vint
+script: vint $(git ls-files | grep -e '.vim$' | grep -v vital)
