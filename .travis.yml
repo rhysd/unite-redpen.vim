@@ -34,3 +34,6 @@ install:
 script:
     - vint --color $(git ls-files | grep -e '.vim$' | grep -v vital)
     - ./vim-themis/bin/themis test/
+matrix:
+    allow_failures:
+        - os: osx
