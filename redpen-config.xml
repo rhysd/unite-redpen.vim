@@ -1,7 +1,7 @@
 <redpen-conf>
     <validators>
         <validator name="SentenceLength">
-              <property name="max_len" value="120"/>
+              <property name="max_len" value="120" />
         </validator>
         <validator name="CommaNumber" />
         <validator name="SuccessiveWord" />
@@ -10,7 +10,9 @@
         <validator name="InvalidExpression" />
         <validator name="InvalidWord" />
         <validator name="Contraction" />
-        <validator name="Spelling" />
+        <validator name="Spelling">
+          <property name="list" value="redpen,TODO" />
+        </validator>
         <validator name="DoubledWord" />
         <validator name="SuccessiveWord" />
 
