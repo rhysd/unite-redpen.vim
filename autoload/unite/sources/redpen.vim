@@ -1,3 +1,5 @@
+scriptencoding utf-8
+
 " unite.vim source definition {{{
 let s:source = {
             \ 'name' : 'redpen',
@@ -81,7 +83,7 @@ function! s:generate_temporary_file() abort
         let name .= s:EXT_MAP[&filetype]
     endif
     let lines = getline(1, '$')
-    let failed = writefile(lines, name) != -1
+    let failed = writefile(lines, name) == -1
     if failed
         call s:echo_error('Failed to create temporary file: %s', name)
         return ''
@@ -272,9 +274,7 @@ function! s:source.hooks.on_init(args, context) abort
         execute w . 'wincmd w'
     endif
 
-    let file = expand('%:p')
-    let args = a:args != [] ? a:args : [file]
-    let a:context.source__redpen_errors = unite#sources#redpen#run_command(args)
+    let a:context.source__redpen_errors = unite#sources#redpen#run_command(a:args)
 
     if should_jump
         wincmd p
