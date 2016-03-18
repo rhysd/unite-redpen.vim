@@ -4,10 +4,11 @@ CONTENTS                                                 *unite-redpen-contents*
 
 1. Introduction................................|unite-redpen-unite-introduction|
 2. Usage....................................................|unite-redpen-usage|
-3. Variables............................................|unite-redpen-variables|
-4. Functions............................................|unite-redpen-functions|
-5. FAQ........................................................|unite-redpen-faq|
-6. License................................................|unite-redpen-license|
+3. Actions................................................|unite-redpen-actions|
+4. Variables............................................|unite-redpen-variables|
+5. Functions............................................|unite-redpen-functions|
+6. FAQ........................................................|unite-redpen-faq|
+7. License................................................|unite-redpen-license|
 
 
 ==============================================================================
@@ -58,6 +59,10 @@ Features:
     - In the list, you can see the detail with mini window ("d" is assigned by
       default).  "d" toggles the mini window.
 
+    - In the list, you can add the word to whitelist from misspelling error
+      ("a" is assigned by default).  This modifies configuration file
+      directly.
+
     - If you want to use previous result, you can use `:UniteResume` command to
       restore last unite.vim window.
 
@@ -66,6 +71,26 @@ Features:
 
     - You can also set |g:redpen_default_config_path| for global default
       configuration.
+
+
+==============================================================================
+ACTIONS                                                   *unite-redpen-actions*
+
+|unite-redpen| defines some actions to operate errors in unite.vim window.
+
+"detail"
+
+    Toggle a preview window to show detail of the error under the cursor.
+    It includes a error message, a sentence including the error, and name of
+    validator.
+    This action is assigned to "d" by default.
+
+"add_to_whitelist"
+
+    When an error under the cursor is a misspelling error, this action adds
+    the word to whitelist of misspelling validator.  It modifies configuration
+    file directly.
+    This action is assigned to "a" by default.
 
 
 ==============================================================================
@@ -88,8 +113,6 @@ VARIABLES                                               *unite-redpen-variables*
     If this variable is set to 1, "preview" action in unite.vim window will
     also open detail window.
     The default value is 0.
-
-    Note: "detail" action is mapped to "d" in unite.vim window by default.
 
 *g:unite_redpen_default_mappings*
 
@@ -144,13 +167,11 @@ FAQ                                                           *unite-redpen-faq*
     You can use |unite#sources#redpen#detect_config()| and |quickrun#run()|.
 >
     function! s:run_redpen_with_quickrun(...) abort
-        let file = get(a:, 1, expand('%:p'))
         let conf = {
             \   'command': 'redpen',
             \   'exec' : '%c %o %s 2>/dev/null',
-            \   'srcfile' : file,
             \ }
-        let redpen_conf = unite#sources#redpen#detect_config(file)
+        let redpen_conf = unite#sources#redpen#detect_config(get(a:, 1, expand('%p')))
         if redpen_conf !=# ''
             let conf.cmdopt = '-c ' . redpen_conf
         endif

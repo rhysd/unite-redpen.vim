@@ -28,8 +28,10 @@ augroup END
 
 " Variables {{{
 let s:V = vital#of('unite_redpen')
-let s:J = s:V.import('Web.JSON')
+let s:JSON = s:V.import('Web.JSON')
+let s:XML = s:V.import('Web.XML')
 let s:EXT_MAP = {'markdown' : '.md', 'asciidoc' : '.asc', 'latex' : '.tex'}
+let s:DICT_TYPE = type({})
 
 let g:unite_redpen_default_jumplist_preview = get(g:, 'unite_redpen_default_jumplist_preview', 0)
 let g:unite_redpen_default_config_path = get(g:, 'unite_redpen_default_config_path', '')
@@ -136,7 +138,9 @@ function! unite#sources#redpen#run_command(args) abort
     " output.
     let json = system(cmd)
     try
-        return s:J.decode(json)[0]
+        let result = s:JSON.decode(json)[0]
+        let result.__configuration = conf
+        return result
     catch
         return {}
     finally
@@ -254,6 +258,7 @@ endfunction
 " }}}
 
 " Source implementation {{{
+" Hooks {{{
 function! s:source.hooks.on_init(args, context) abort
     if exists('b:unite') && has_key(b:unite, 'prev_bufnr')
         let a:context.source__bufnr = b:unite.prev_bufnr
@@ -284,6 +289,7 @@ function! s:source.hooks.on_syntax(args, context) abort
 
     if g:unite_redpen_default_mappings
         nnoremap <buffer><silent><expr>d unite#smart_map('d', unite#do_action('detail'))
+        nnoremap <buffer><silent><expr>a unite#smart_map('a', unite#do_action('add_to_whitelist'))
     endif
 endfunction
 
@@ -310,6 +316,7 @@ function! s:source.gather_candidates(args, context) abort
     let ret = []
     for idx in range(len(errors))
         let e = errors[idx]
+        let e.__configuration = a:context.source__redpen_errors.__configuration
         let ret += [{
             \   'word' :  e.message . ' [' . e.validator . ']',
             \   'is_multiline' : 1,
@@ -323,13 +330,15 @@ function! s:source.gather_candidates(args, context) abort
 
     return ret
 endfunction
+" }}}
 
+" Actions {{{
 let s:source.action_table.echo_json = {
             \   'description' : 'Echo JSON value corresponding to the error',
             \ }
 function! s:source.action_table.echo_json.func(candidate) abort
     try
-        PP a:candidate.action__redpen_error
+        PrettyPrint a:candidate.action__redpen_error
     catch
         echo a:candidate.action__redpen_error
     endtry
@@ -350,6 +359,87 @@ function! s:source.action_table.detail.func(candidate) abort
     endif
 endfunction
 
+function! s:find_property(validator) abort
+    let object_type = type({})
+    for c in a:validator.child
+        if type(c) == s:DICT_TYPE && has_key(c, 'name') && c.name ==# 'property'
+            return c
+        endif
+        unlet c
+    endfor
+    return {}
+endfunction
+
+function! s:find_spelling_validator(xml) abort
+    let vs = a:xml.find('validators')
+    if vs ==# {}
+        return [{}, {}, -1]
+    endif
+
+    for idx in range(len(vs.child))
+        let node = vs.child[idx]
+        if type(node) != s:DICT_TYPE
+            unlet l:node
+            continue
+        endif
+        if has_key(node.attr, 'name') && node.attr.name ==# 'Spelling'
+            return [vs, node, idx]
+        endif
+        unlet l:node
+    endfor
+
+    return [vs, {}, -1]
+endfunction
+
+function! s:update_misspelling_whitelist(xml, word) abort
+    let [validators, validator, index] = s:find_spelling_validator(a:xml)
+    if index == -1
+        call s:echo_error('<Spelling/> validator was not found')
+        return {}
+    endif
+
+    let prop = s:find_property(validator)
+    if !has_key(prop, 'attr') || !has_key(prop.attr, 'value')
+        let indent = index > 0 ? validators.child[index-1] : "\n"
+        let child = s:XML.createElement('property')
+        let child.attr = {
+                \   'name' : 'list',
+                \   'value' : a:word,
+                \ }
+        let validator.child = [indent . '  ', child, indent]
+        return a:xml
+    else
+        let prop.attr.value .= ',' . a:word
+        return a:xml
+    endif
+endfunction
+
+let s:source.action_table.add_to_whitelist = {
+            \   'description' : 'Add the misspelling word to whitelist',
+            \   'is_quit' : 0,
+            \ }
+function! s:source.action_table.add_to_whitelist.func(candidate) abort
+    let word = matchstr(a:candidate.word, 'ミススペルの可能性がある単語 "\zs[^"]\+\ze" がみつかりました。')
+    if word ==# ''
+        call s:echo_error('No word was found from the error message')
+        return
+    endif
+
+    let conf = a:candidate.action__redpen_error.__configuration
+    if conf ==# ''
+        call s:echo_error('No configuration file was detected to add symbol')
+        return
+    endif
+    let xml = s:XML.parseFile(conf)
+    let xml = s:update_misspelling_whitelist(xml, word)
+    if xml == {}
+        return
+    endif
+
+    call writefile(split(xml.toString(), "\n"), conf)
+    echom 'Added "' . word . '" to whitelist of misspelling validator.'
+endfunction
+
 if g:unite_redpen_default_jumplist_preview
     finish
 endif
@@ -368,4 +458,5 @@ function! s:source.action_table.preview.func(candidate) abort
 
     call s:move_to_error(e, b)
 endfunction
+" }}}
 " }}}
