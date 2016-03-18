@@ -53,13 +53,20 @@ endfunction
 
 function! unite#sources#redpen#detect_config(file) abort
     let dir = fnamemodify(a:file, ':p:h')
+
+    let default = ''
+    if g:unite_redpen_default_config_path !=# ''
+        \ && filereadable(g:unite_redpen_default_config_path)
+        let default = g:unite_redpen_default_config_path
+    endif
+
     if !isdirectory(dir)
-        return g:unite_redpen_default_config_path
+        return default
     endif
 
     let conf = findfile('redpen-config.xml', dir . ';')
     if conf ==# ''
-        return g:unite_redpen_default_config_path
+        return default
     endif
 
     return conf
