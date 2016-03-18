@@ -5,19 +5,32 @@ jdk:
 dist: trusty
 sudo: required
 
+os:
+    - linux
+    - osx
+
 install:
-    - sudo apt-get update -q
-    - sudo apt-get install python3 python3-pip -y
-    - sudo pip3 install vim-vint
+    - |
+        if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+            brew update
+            brew install macvim --with-override-system-vim
+            brew install python3
+            export JAVA_HOME=`/usr/libexec/java_home`
+        else
+            sudo apt-get update -q
+            sudo apt-get install python3 python3-pip -y
+            sudo pip3 install vim-vint
+            curl -sflL https://github.com/redpen-cc/redpen/releases/download/redpen-1.5.2/redpen-1.5.2.tar.gz -o redpen-1.5.2.tar.gz
+            tar xf redpen-1.5.2.tar.gz
+            export PATH=redpen-distribution-1.5.2/bin:$PATH
+            export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+        fi
     - git clone https://github.com/thinca/vim-themis
     - git clone https://github.com/Shougo/unite.vim.git
-    - curl -sflL https://github.com/redpen-cc/redpen/releases/download/redpen-1.5.2/redpen-1.5.2.tar.gz -o redpen-1.5.2.tar.gz
-    - tar xf redpen-1.5.2.tar.gz
-    - export PATH=redpen-distribution-1.5.2/bin:$PATH
-    - export JAVA_HOME=/usr/lib/jvm/java-8-oracle
     - python3 --version
     - java -version
     - redpen --version
+    - vim --version
 script:
     - vint --color $(git ls-files | grep -e '.vim$' | grep -v vital)
     - ./vim-themis/bin/themis test/
