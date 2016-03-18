@@ -17,7 +17,7 @@ TODO: screenshot
 :Unite redpen -auto-preview
 ```
 
-The command executes `redpen` and show the errors reported by it in unite.vim window.  In the list, you can preview detail of the error (`p` is assigned by default).  When select an item in the list, cursor will move to the error position.
+The command executes `redpen` and show the errors reported by it in unite.vim window.  In the list, you can preview detail of the error (`p` is assigned by default).  When select an item in the list, cursor will move to the error position.  If you want to use previous, you can use `:UniteResume` command to restore last unite.vim window.
 
 If you put a `redpen-config.xml` configuration file in a repository, unite-redpen.vim detects it automatically. You can also set `g:redpen_default_config_path` for global default configuration.
 
@@ -37,6 +37,7 @@ call quickrun#run(conf)
 
 - [x] Fundamentals
 - [x] Configuration detection
+- [ ] Available on temprary/unsaved buffer
 - [ ] Help
 - [ ] Tests
 
