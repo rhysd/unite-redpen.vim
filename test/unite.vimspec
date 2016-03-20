@@ -34,6 +34,10 @@ Describe :Unite redpen
 
     Describe 'preview' action
         It highlights error word in original buffer
+            if g:on_travis
+                Skip because it does not work on Travis CI
+            endif
+
             let bufnr = bufnr('%')
             Unite redpen -no-start-insert
             normal! gg
@@ -54,6 +58,10 @@ Describe :Unite redpen
         End
 
         It removes current highlight when another preview shown
+            if g:on_travis
+                Skip because it does not work on Travis CI
+            endif
+
             let bufnr = bufnr('%')
             Unite redpen -no-start-insert
 

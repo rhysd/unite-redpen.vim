@@ -14,4 +14,4 @@ for s:rtp in ['unite.vim', '~/.vim/bundle/unite.vim', '~/.vim/bundle/unite']
 endfor
 unlet! s:rtp
 
-syntax on
+let g:on_travis = $TRAVIS !=# ''
