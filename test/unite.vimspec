@@ -37,7 +37,7 @@ Describe :Unite redpen
             let bufnr = bufnr('%')
             Unite redpen -no-start-insert
             normal! gg
-            normal p
+            call unite#action#do('preview')
 
             " Ensure cursor remains in unite window
             Assert True(exists('b:unite'))
@@ -58,8 +58,9 @@ Describe :Unite redpen
             Unite redpen -no-start-insert
 
             normal! gg
-            normal p
-            normal jp
+            call unite#action#do('preview')
+            normal j
+            call unite#action#do('preview')
 
             let winnr = bufwinnr(bufnr)
             Assert NotEqual(winnr, -1)
