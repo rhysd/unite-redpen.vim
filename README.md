@@ -11,7 +11,7 @@ TODO: screenshot
 ```vim
 :Unite redpen
 
-" Show preview automatically
+" Show preview automatically (start in normal mode)
 :Unite redpen -auto-preview -no-start-insert
 
 " With command line options
@@ -30,6 +30,10 @@ Features:
 - You can also set `g:redpen_default_config_path` for global default configuration.
 
 Please see [documentation](doc/unite-redpen.txt) to know all features.
+
+```vim
+help unite-redpen
+```
 
 
 ## Installation
@@ -54,16 +58,6 @@ Plugin 'rhysd/unite-redpen.vim'
 NeoBundle 'Shougo/unite.vim'
 NeoBundle 'rhysd/unite-redpen.vim'
 ```
-
-
-## TODO
-
-- [x] Fundamentals
-- [x] Configuration detection
-- [x] Available on temprary/unsaved buffer
-- [x] Help
-- [x] Add an action to add a symbol from misspelling error
-- [ ] Tests
 
 
 ## License
