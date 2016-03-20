@@ -29,11 +29,7 @@ Features:
 - If you want to use previous result, you can use `:UniteResume` command to restore last unite.vim window.
 - You can also set `g:redpen_default_config_path` for global default configuration.
 
-Please see [documentation](doc/unite-redpen.txt) to know all features.
-
-```vim
-help unite-redpen
-```
+Please see [`:help unite-redpen`](doc/unite-redpen.txt) to know all features.
 
 
 ## Installation
