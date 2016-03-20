@@ -12,7 +12,7 @@ TODO: screenshot
 :Unite redpen
 
 " Show preview automatically
-:Unite redpen -auto-preview
+:Unite redpen -auto-preview -no-start-insert
 
 " With command line options
 :Unite redpen:--limit:10

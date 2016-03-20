@@ -1,0 +1,138 @@
+Describe :Unite redpen
+    Before each
+        edit! test/assets/b/doc.md
+    End
+
+    After each
+        bufdo bwipeout!
+    End
+
+    Describe unite window
+        It show the result of redpen
+            Unite redpen -no-start-insert
+            Assert True(exists('b:unite'))
+            Assert HasKey(b:unite.candidates[0], 'action__redpen_error')
+        End
+
+        It jumps to the error position when selected an error
+            Unite redpen -no-start-insert
+            normal! gg
+            let err = b:unite.candidates[0].action__redpen_error
+            if has_key(err, 'startPosition')
+                let line = err.startPosition.lineNum
+                let col = err.startPosition.offset
+            else
+                let line = err.lineNum
+                let col = err.sentenceStartColumnNum
+            endif
+            execute 'normal' "\<CR>"
+            Assert Equals(line('.'), line)
+            " -1 because offset is 0-based
+            Assert Equals(col('.')-1, col)
+        End
+    End
+
+    Describe 'preview' action
+        It highlights error word in original buffer
+            let bufnr = bufnr('%')
+            Unite redpen -no-start-insert
+            normal! gg
+            normal p
+
+            " Ensure cursor remains in unite window
+            Assert True(exists('b:unite'))
+
+            let winnr = bufwinnr(bufnr)
+            Assert NotEqual(winnr, -1)
+            execute winnr . 'wincmd w'
+
+            Assert True(exists('b:unite_redpen_error_match_id'))
+            let found = 0
+            let matches = getmatches()
+            Assert Equals(len(matches), 1)
+            Assert Equals(b:unite_redpen_error_match_id, matches[0].id)
+        End
+
+        It removes current highlight when another preview shown
+            let bufnr = bufnr('%')
+            Unite redpen -no-start-insert
+
+            normal! gg
+            normal p
+            normal jp
+
+            let winnr = bufwinnr(bufnr)
+            Assert NotEqual(winnr, -1)
+            execute winnr . 'wincmd w'
+            Assert Equals(len(getmatches()), 1)
+        End
+
+        It removes error highlight on closing unite window
+            Skip because on_close hook looks not being fired
+
+            Unite redpen -no-start-insert
+            normal! gg
+            normal p
+            normal "\<CR>"
+            Assert False(exists('b:unite_redpen_error_match_id'))
+            Assert Empty(getmatches())
+        End
+    End
+
+    Describe 'detail' action
+        It shows detail of the error in a preview window
+            Unite redpen -no-start-insert
+            normal! gg
+            call unite#action#do('detail')
+
+            " Ensure cursor remains in unite window
+            Assert True(exists('b:unite'))
+
+            let w = winnr()
+            wincmd P
+            Assert NotEqual(w, winnr())
+
+            let lines = join(getline(1, '$'), "\n")
+            Assert Match(lines, '^Error:')
+            Assert Match(lines, '\nSentence:')
+            Assert Match(lines, '\nValidator:')
+        End
+
+        It toggles detail window
+            Skip because I cannot reproduce the failrue
+
+            Unite redpen -no-start-insert
+            normal! gg
+            call unite#action#do('detail')
+            call unite#action#do('detail')
+
+            Throws /E441/ :wincmd P
+        End
+
+        It closes detail window on quiting unite window
+            Unite redpen -no-start-insert
+            normal! gg
+            call unite#action#do('detail')
+            execute 'normal' "\<CR>"
+
+            Throws /E441/ :wincmd P
+        End
+
+        It updates detail when doing the action on another error
+            Unite redpen -no-start-insert
+            normal! gg
+            call unite#action#do('detail')
+            wincmd P
+            let prev_lines = join(getline(1, '$'), "\n")
+            wincmd p
+            normal j
+            call unite#action#do('detail')
+            wincmd P
+            Assert NotEqual(prev_lines, join(getline(1, '$'), "\n"))
+        End
+    End
+
+    Describe 'add_to_whitelist' action
+        " TODO
+    End
+End
