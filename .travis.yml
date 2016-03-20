@@ -6,8 +6,7 @@ sudo: required
 
 os:
     - linux
-    # language: java is unavailable on OS X now
-    # - osx
+    - osx
 
 install:
     - |
