@@ -6,7 +6,7 @@ This is a [unite.vim](https://github.com/Shougo/unite.vim) integration of [redpe
 
 ## Usage
 
-TODO: screenshot
+![screenshot](https://raw.githubusercontent.com/rhysd/ss/master/unite-redpen.vim/main.gif)
 
 ```vim
 :Unite redpen

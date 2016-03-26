@@ -34,7 +34,10 @@ redpen is available for Markdown, AsciiDoc, Textile and LaTeX.
 ==============================================================================
 USAGE                                                       *unite-redpen-usage*
 
-TODO: screenshot
+ScreenShot:
+
+    https://raw.githubusercontent.com/rhysd/ss/master/unite-redpen.vim/main.gif
+
 
 Please specify "redpen" source on |:Unite| command as below:
 >
