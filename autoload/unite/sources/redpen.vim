@@ -29,7 +29,7 @@ augroup END
 " }}}
 
 " Variables {{{
-let s:V = vital#of('unite_redpen')
+let s:V = vital#unite_redpen#of()
 let s:JSON = s:V.import('Web.JSON')
 let s:XML = s:V.import('Web.XML')
 let s:EXT_MAP = {'markdown' : '.md', 'asciidoc' : '.asc', 'latex' : '.tex'}
