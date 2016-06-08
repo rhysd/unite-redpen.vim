@@ -22,7 +22,6 @@ Features:
 
 - `:Unite redpen` executes `redpen` and show list of the errors reported by it in unite.vim window.
 - When select an item in the list, cursor will move to the error position.
-- If you put a `redpen-config.xml` configuration file in a repository, unite-redpen.vim detects it automatically.
 - In the list, you can confirm place of the error with highlight (`p` is assigned by default).
 - In the list, you can see the detail with mini window (`d` is assigned by default).  `d` toggles the mini window.
 - In the list, you can add the word to whitelist from misspelling error ("a" is assigned by default).
@@ -54,6 +53,16 @@ Plugin 'rhysd/unite-redpen.vim'
 NeoBundle 'Shougo/unite.vim'
 NeoBundle 'rhysd/unite-redpen.vim'
 ```
+
+
+## TODO
+
+- [x] Fundamentals
+- [x] Configuration detection
+- [x] Available on temprary/unsaved buffer
+- [x] Help
+- [x] Add an action to add a symbol from misspelling error
+- [x] Tests
 
 
 ## License

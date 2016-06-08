@@ -1,20 +1,20 @@
-Describe unite#sources#redpen#detect_config()
+Describe unite#sources#redpen#detect_config_legacy()
     It returns empty string if no configuration is found
         let f = tempname()
-        Assert Equals(unite#sources#redpen#detect_config(f), '')
+        Assert Equals(unite#sources#redpen#detect_config_legacy(f), '')
         try
             call writefile([''], f)
-            Assert Equals(unite#sources#redpen#detect_config(f), '')
+            Assert Equals(unite#sources#redpen#detect_config_legacy(f), '')
         finally
             call delete(f)
         endtry
     End
 
     It detects configuration from target file
-        let conf = unite#sources#redpen#detect_config('test/assets/a/doc.md')
+        let conf = unite#sources#redpen#detect_config_legacy('test/assets/a/doc.md')
         Assert Equals(conf, 'test/assets/a/redpen-config.xml')
 
-        let conf = unite#sources#redpen#detect_config('test/assets/b/doc.md')
+        let conf = unite#sources#redpen#detect_config_legacy('test/assets/b/doc.md')
         Assert Equals(conf, 'redpen-config.xml')
     End
 
@@ -22,7 +22,7 @@ Describe unite#sources#redpen#detect_config()
         let saved = g:unite_redpen_default_config_path
         try
             let g:unite_redpen_default_config_path = 'test/assets/a/redpen-config.xml'
-            let conf = unite#sources#redpen#detect_config(tempname())
+            let conf = unite#sources#redpen#detect_config_legacy(tempname())
             Assert Equals(conf, 'test/assets/a/redpen-config.xml')
         finally
             let g:unite_redpen_default_config_path = saved
@@ -33,7 +33,7 @@ Describe unite#sources#redpen#detect_config()
         let saved = g:unite_redpen_default_config_path
         try
             let g:unite_redpen_default_config_path = tempname()
-            let conf = unite#sources#redpen#detect_config(tempname())
+            let conf = unite#sources#redpen#detect_config_legacy(tempname())
             Assert Equals(conf, '')
         finally
             let g:unite_redpen_default_config_path = saved

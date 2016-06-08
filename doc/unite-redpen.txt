@@ -130,17 +130,33 @@ VARIABLES                                               *unite-redpen-variables*
     preview action to preview errors.
     Default value is 0.
 
+*g:unite_redpen_use_legacy_config_detection*
+
+    When this variable is set to 1, |unite-redpen| detects config file with
+    original logic.
+    From redpen 1.6, it detects config file automatically.  So we don't need
+    to detect configuration file by ourself.  Please see a manual.
+    Old config file detection remains because of compatibility and old redpen
+    (1.5 or less).
+
+    Manual: http://redpen.cc/docs/latest/index.html
+
 
 ==============================================================================
 FUNCTIONS                                               *unite-redpen-functions*
 
                                             *unite#sources#redpen#detect_config*
-unite#sources#redpen#detect_config({file})
+unite#sources#redpen#detect_config_legacy({file})
 
     Returns the path to redpen's configuration file for {file}.  If nothing is
     found, it returns empty string.
 
     Note: The file name must be "respen-config.xml".
+
+    From redpen 1.6, it detects config file automatically.  Please read the
+    manual.
+
+    Manual: http://redpen.cc/docs/latest/index.html
 
                                               *unite#sources#redpen#run_command*
 unite#sources#redpen#run_command({args})

@@ -40,6 +40,7 @@ let g:unite_redpen_default_config_path = get(g:, 'unite_redpen_default_config_pa
 let g:unite_redpen_command = get(g:, 'unite_redpen_command', 'redpen')
 let g:unite_redpen_detail_window_on_preview = get(g:, 'unite_redpen_detail_window_on_preview', 0)
 let g:unite_redpen_default_mappings = get(g:, 'unite_redpen_default_mappings', 1)
+let g:unite_redpen_use_legacy_config_detection = get(g:, 'unite_redpen_use_legacy_config_detection', 0)
 " }}}
 
 " Utilities {{{
@@ -56,7 +57,7 @@ function! s:echo_error(msg, ...) abort
     endtry
 endfunction
 
-function! unite#sources#redpen#detect_config(file) abort
+function! unite#sources#redpen#detect_config_legacy(file) abort
     let dir = fnamemodify(a:file, ':p:h')
 
     let default = ''
@@ -100,7 +101,9 @@ function! unite#sources#redpen#run_command(args) abort
     let args = a:args
 
     let file = ''
-    if args == []
+    if !g:unite_redpen_use_legacy_config_detection
+        let conf = ''
+    elseif args == []
         let file = expand('%:p')
         if &modified || !filereadable(file)
             let file = s:generate_temporary_file()
@@ -110,7 +113,7 @@ function! unite#sources#redpen#run_command(args) abort
             let temporary_file_created = 1
         endif
         let args += [file]
-        let conf = unite#sources#redpen#detect_config(expand('%:p'))
+        let conf = unite#sources#redpen#detect_config_legacy(expand('%:p'))
     else
         for a in args
             if filereadable(a)
@@ -122,7 +125,7 @@ function! unite#sources#redpen#run_command(args) abort
             call s:echo_error('No existing file is included: %s', join(args, ' '))
             return {}
         endif
-        let conf = unite#sources#redpen#detect_config(file)
+        let conf = unite#sources#redpen#detect_config_legacy(file)
     endif
 
     let args += ['-r', 'json']

@@ -1,4 +1,4 @@
-<redpen-conf>
+<redpen-conf lang="en">
     <validators>
         <validator name="SentenceLength">
               <property name="max_len" value="120" />
